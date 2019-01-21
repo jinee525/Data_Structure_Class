@@ -1,0 +1,122 @@
+//3중 array만들어서 A+B=C 하기
+
+#include <malloc.h>
+#include <stdio.h>
+int main ()
+{
+//Define two matrices A and B using ‘mem_alloc_3D_double’;
+int rows=3;
+int cols=3;
+int height=3;
+double ***A,***B,***C;
+int r, c, h;
+double i=1;
+
+
+A=(double***)malloc(sizeof(double***)*height);
+for (h = 0; h < 3; h++) {
+	A[h] = (double **) malloc(sizeof(double*)*rows);
+	for (r = 0; r < 3; r++) {
+		A[h][r] = (double*) malloc(sizeof(double)*cols);
+	}
+}
+ for (h = 0; h < height; h++) {
+ 	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			A[h][r][c]=i;
+			i++;
+		}
+	}
+}
+
+for (h = 0; h < height; h++) {
+	printf("Height %d\n", h);
+	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			printf("%f ", A[h][r][c]);
+ 		}
+  		printf("\n");
+ 	}
+  	printf("\n");
+}
+
+B=(double***)malloc(sizeof(double***)*height);
+for (h = 0; h < 3; h++) {
+	B[h] = (double **) malloc(sizeof(double*)*rows);
+	for (r = 0; r < 3; r++) {
+		B[h][r] = (double*) malloc(sizeof(double)*cols);
+	}
+}
+ for (h = 0; h < height; h++) {
+ 	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			B[h][r][c]=i;
+			i++;
+		}
+	}
+}
+
+for (h = 0; h < height; h++) {
+	printf("Height %d\n", h);
+	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			printf("%f ", B[h][r][c]);
+ 		}
+  		printf("\n");
+ 	}
+  	printf("\n");
+}
+
+//Perform addition of two matrices using ‘addition_3D()’
+//C=A+B
+C=(double***)malloc(sizeof(double***)*height);
+for (h = 0; h < 3; h++) {
+	C[h] = (double **) malloc(sizeof(double*)*rows);
+	for (r = 0; r < 3; r++) {
+		C[h][r] = (double*) malloc(sizeof(double)*cols);
+	}
+}
+ for (h = 0; h < height; h++) {
+ 	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			C[h][r][c]=A[h][r][c]+B[h][r][c];
+		}
+	}
+}
+
+printf("A+B\n");
+for (h = 0; h < height; h++) {
+	printf("Height %d\n", h);
+	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+			printf("%f ", C[h][r][c]);
+ 		}
+  		printf("\n");
+ 	}
+  	printf("\n");
+}
+//Deallocate A and B
+if (A!=NULL){
+	free(A[0][0]);
+	free (A[0]);
+	free(A);
+	A=NULL;
+}
+if (B!=NULL){
+	free(B[0][0]);
+	free (B[0]);
+	free(B);
+	B=NULL;
+}
+if (C!=NULL){
+	free(C[0][0]);
+	free (C[0]);
+	free(C);
+	C=NULL;
+}
+
+if(A==NULL){
+printf("hi");}
+
+return 0;
+}
