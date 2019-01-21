@@ -1,0 +1,123 @@
+//Radix sort using counting sort
+
+#include "stack"
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+#include "time.h"
+
+#define BUCKETS 10 //num of input
+#define DIGITS 4  //digit of inputs
+
+typedef struct num_st{  //각자리숫자를 구성요소로 가진 하나의 숫자를 struct으로 
+	int A=0; //1000
+	int B=0; //100
+	int C=0; //10
+	int D=0; //1
+}num_st;
+
+typedef struct in_array{  //input숫자구조들을 배열로 가질 더큰 구조 정의 
+	num_st* in[BUCKETS];  //배열로 numst 값들 저장 포인터변수!!!! 
+	//int size=BUCKETS; //입력 숫자의 총  갯수 
+}in_array;
+
+in_array *input= (in_array *)malloc(sizeof(in_array)); //input 생성 
+
+int random(){
+	int random = rand()%10000; //0~9999 범위의 난수 생성 
+	return random;
+}
+
+//counting sort 준비 
+int* count(in_array* input,int dex,int* countout){
+	//return값은 포인터로!!  
+	for(int j=0;j<BUCKETS;j++){
+		int temp;
+		switch (dex){
+			case 1: temp=input->in[j]->D; break;
+			case 2: temp=input->in[j]->C; break;
+			case 3: temp=input->in[j]->B; break;    //case문은 int 'char' 
+			case 4: temp=input->in[j]->A; break;
+			default : printf("wow"); break;
+		}
+		//temp의 숫자가 index가 되어서 0~9까지 숫자 카운트하는 배열countout에 갯수 넣기. 
+		if (countout[temp]==0)
+			countout[temp]=1;
+		else
+			countout[temp]=countout[temp]+1;   //count히스토그램 만들기 
+	}
+	for(int t=1;t<10;t++){
+		countout[t]=countout[t]+countout[t-1];
+	}
+	//for(int g=0;g<10;g++)
+		//printf("**%d\n", countout[g]);   //확인차 
+	return countout;
+}
+//count sorting!
+in_array* count_sort(in_array* input,int* countout,int dex){
+	//메모리할당 
+	in_array* output=(in_array*)malloc(sizeof(in_array));
+	for( int h=0;h<BUCKETS;h++){
+		output->in[h]=(num_st*)malloc(sizeof(num_st));
+	}
+	
+	for(int k=BUCKETS-1;k>=0;k--){
+		int temp;  //input의 각 자리의 숫자이자 coutout의 index 그곳의 값은 count 
+		switch (dex){
+			case 1 : temp=input->in[k]->D; break;  //해당자릿수 숫자 가져오기 
+			case 2 : temp=input->in[k]->C; break;
+			case 3 : temp=input->in[k]->B; break;
+			case 4 : temp=input->in[k]->A; break;
+			default: printf("wow");
+		}
+		output->in[countout[temp]-1]->A=input->in[k]->A;	//해당하는 자리에 넣어줌! 
+		output->in[countout[temp]-1]->B=input->in[k]->B;
+		output->in[countout[temp]-1]->C=input->in[k]->C;
+		output->in[countout[temp]-1]->D=input->in[k]->D;
+		countout[temp]--; //한개 뺴줌
+		//printf("%d\n",k); //확인용 
+	}
+	return output;
+} 
+
+int main(){
+	for( int h=0;h<BUCKETS;h++){
+		input->in[h]=(num_st*)malloc(sizeof(num_st));
+	}
+	
+	srand(time(NULL));  //중복없이 난수 뽑기 위해! 
+	printf("Random nums -> input:\n"); 
+	for (int i=0 ; i<BUCKETS;i++){   //in배열에 숫자넣기 0~9 
+		int temp=random();  
+		printf("%d\n",temp);   
+		input->in[i]->A=temp/1000;  //1000자리 
+		input->in[i]->B=(temp/100)%10; //100자리 
+		input->in[i]->C=(temp/10)%10;  //10자리 
+		input->in[i]->D=temp%10; //1자리 
+		//printf("--%d%d%d%d\n", input->in[i]->A,input->in[i]->B,input->in[i]->C,input->in[i]->D);   //들어간거확인 
+	}
+
+	//LSD to MSD 순서로 sorting하기! 
+	int countout1[10]={0,0,0,0,0,0,0,0,0,0}; 
+	int* count_1=count(input,1,countout1);
+	//printf("malloc\n"); //중간확인 
+	in_array* mid=count_sort(input,count_1,1);
+	
+	int countout2[10]={0,0,0,0,0,0,0,0,0,0}; 
+	int* count_2=count(mid,2,countout2);
+	mid=count_sort(mid,count_2,2);
+	
+	int countout3[10]={0,0,0,0,0,0,0,0,0,0}; 
+	int* count_3=count(mid,3,countout3);
+	mid=count_sort(mid,count_3,3);
+	
+	int countout4[10]={0,0,0,0,0,0,0,0,0,0}; 
+	int* count_4=count(mid,4,countout4);
+	mid=count_sort(mid,count_4,4);
+	
+	printf("\nRadix sort using Counting sort:\n");
+	for(int h=0;h<BUCKETS;h++){
+	printf("%d%d%d%d\n",mid->in[h]->A,mid->in[h]->B,mid->in[h]->C,mid->in[h]->D);
+	}
+}
+
