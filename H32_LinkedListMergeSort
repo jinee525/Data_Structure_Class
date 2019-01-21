@@ -1,0 +1,115 @@
+//두개의 linked list merge sort 하기
+
+
+#include<stdio.h> 
+#include<stdlib.h> 
+ 
+  
+//Nodde struct 만들
+struct Node 
+{ 
+    int data; 
+    struct Node* next; 
+}; 
+  
+
+// 리턴노드와  값을 가져올 노드ab의 포인터 옮기고 새로 만드는 함수 !
+void MoveNode(struct Node** nextTail, struct Node** ab) 
+{ 
+    //다음 노드의 값을 비교하기 위해 포인터 옮기기 
+    struct Node* newNode = *ab; 
+    *ab = newNode->next; 
+   //매개변수로 받아온 작은 노드의 주소를 merge할 노드에 추가하기 
+    newNode->next = *nextTail; 
+    *nextTail = newNode; 
+}   
+  
+//각 노드의 data값 크기를 비교해서 작은 것을 가진 노드를 반환하는 함수 
+struct Node* MergeSort(struct Node* a, struct Node* b) 
+{ 
+	//반환 값을 담을 노드 c 생성하
+    struct Node c; 
+  
+    struct Node* tail = &c; 
+  
+    
+    c.next = NULL; 
+    while (1) 
+    { 
+    	//하나의 리스트만 있을 경우 
+        if (a == NULL) 
+        { 
+            tail->next = b; 
+            break; 
+        } 
+        else if (b == NULL) 
+        { 
+            tail->next = a; 
+            break; 
+        }  
+        //각 노드의 data크기 비교하여 작은 노드의 주소를 merge할 노드에 추가하고 비교 노드ab를 다음 노드로 이동! 
+        if (a->data <= b->data) 
+            MoveNode(&(tail->next), &a); 
+        else
+            MoveNode(&(tail->next), &b); 
+  
+        tail = tail->next; 
+    } 
+    return(c.next); 
+} 
+ 
+
+   
+   //노드 생성  함수 만들기
+void push(struct Node** headpointer, int new_data) 
+{ 
+    //malloc으로 노드 할당 
+    struct Node* new_node = (struct Node*) malloc(sizeof(struct Node)); 
+    new_node->data  = new_data; 
+    new_node->next = (*headpointer); 
+    (*headpointer)    = new_node; 
+} 
+  
+//출력하는 함수 추가 
+void printList(struct Node *node) 
+{ 
+    while (node!=NULL) 
+    { 
+        printf("%d ", node->data); 
+        node = node->next; 
+    } 
+} 
+
+
+
+int main() 
+{ 
+    //노드선언 
+    struct Node* res = NULL; 
+    struct Node* a = NULL; 
+    struct Node* b = NULL; 
+  
+   //push함수로 리스트 값 넣기 
+    push(&a, 25); 
+    push(&a, 20); 
+    push(&a, 15); 
+    push(&a, 10); 
+    push(&a, 5); 
+    push(&a, 2); 
+    push(&a, 1); 
+  
+  	push(&b, 30);
+  	push(&b, 18);
+	push(&b, 15);
+    push(&b, 8); 
+    push(&b, 7); 
+    push(&b, 3); 
+  
+    //mergesort함수 실행 
+    res = MergeSort(a, b); 
+  	//값 출력 !
+    printf("merge two sorted linke list c: \n"); 
+    printList(res); 
+  
+    return 0; 
+} 
