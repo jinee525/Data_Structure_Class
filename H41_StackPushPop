@@ -1,0 +1,94 @@
+//CircularDoublyLinkedList로 정의된 stack
+
+#include "stack"
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+
+typedef int element;
+
+typedef struct DlistNode {
+element data;
+struct DlistNode *llink;
+struct DlistNode *rlink;
+} DlistNode;
+
+typedef struct {
+	DlistNode *top;
+} LinkedStackType;
+
+void init(LinkedStackType *s)
+{
+	s->top = NULL;
+}
+
+int is_empty(LinkedStackType *s)
+{
+	return (s->top == NULL);
+}
+
+void push(LinkedStackType *s, element item)
+{
+	DlistNode *temp = (DlistNode *)malloc(sizeof(DlistNode));
+	if (s->top==NULL) {    //처음넣는 경우 따로 코드 짜줘야함!!!!!!  
+		temp->data = item;
+		s->top=temp;
+		temp->rlink=temp;
+		temp->llink=temp;
+	}
+
+	else {
+		temp->data = item;
+		temp->llink=s->top->llink;
+		temp->rlink=s->top;
+		s->top->llink=temp;
+		s->top->llink->llink->rlink=temp;    //push하는 node의 rlink,llink빠짐없이 연결해주기..!! 
+		s->top=temp;
+	}
+}
+
+
+element pop(LinkedStackType *s)
+{
+	if (is_empty(s)) {
+		fprintf(stderr, "Stack is empty\n");
+		exit(1);
+	}
+	else {
+		DlistNode *temp = s->top;
+		int item = temp->data;
+		s->top = s->top->rlink;
+		s->top->llink=s->top->llink->llink;
+		s->top->llink->rlink=s->top;
+		free(temp);
+		return item;
+	}
+}
+
+element peek(LinkedStackType *s)
+{
+	if (is_empty(s)) {
+		fprintf(stderr, "Stack is empty\n");
+		exit(1);
+	}
+	else {		
+		return s->top->data;
+	}
+}
+
+int main()
+{
+	LinkedStackType s;
+	init(&s);
+	push(&s, 1);
+	//printf("%d\n", peek(&s));      //push가 잘 되었는지 확인차 출력해보기 
+	push(&s, 2);
+	//printf("%d\n", peek(&s));
+	push(&s, 3);
+	//printf("%d\n", peek(&s));
+
+	printf("circular doubly linked list of stack\n") ;
+	printf("%d\n", pop(&s));
+	printf("%d\n", pop(&s));
+	printf("%d\n", pop(&s));
+}
