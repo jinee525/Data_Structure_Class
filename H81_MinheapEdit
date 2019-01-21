@@ -1,0 +1,91 @@
+//decrease_key_minheap & increase_key_minheap
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "stack"
+
+#define MAX_ELEMENT 2000
+#define size 10
+//key 값은 index+1이다..! 
+
+//heap->key
+typedef struct element{
+	int key;  //노드에 들어있는 숫자! 
+} element;
+//heaptype
+typedef struct {
+	element *heap;  //array로 
+	int heap_size;
+} HeapType;
+
+//decrease the element node’s value to ‘key’//node=index+1
+void Decrease_key_min_heap(HeapType* input,int node,int key){  
+	//node는 노드의 index+1, 1~size //key는 그안의 숫자 
+	if (key >= input->heap[node].key)
+		printf("new key is not smaller than current key\n");
+
+	// 첫노드전까지 key값 비교해가며 minheap 만족하도록 하기 
+	else{
+		while ((node != 1) && (key < input->heap[node / 2].key)) {
+			input->heap[node].key = input->heap[node / 2].key; //부모노드의key값을 자신으로가져오기 
+			input->heap[node/2].key=key;//부모노드의key값을 decrease한 key값으로 변경 
+			node=node/2; //node값 수정 
+		}
+	}
+	for(int j=1;j<=size;j++){
+		printf("%d ",input->heap[j].key);
+	}
+	printf("\n");
+}
+
+//Increase the element i’s value to ‘key’//node=index+1 , key는 노드안의 숫자 
+void Increase_key_min_heap(HeapType* input,int node,int key){
+//node는 노드의 index+1 ,1~size //key는 그안의 숫자 
+	if (key <= input->heap[node].key)
+		printf("new key is not larger than current key");
+
+	// 첫노드전까지 key값 비교해가며 minheap 만족하도록 하기 
+	else{
+		while (node*2 <=size || (node*2)+1<=size)//child node가 있는 경우에만 
+		{	
+			if ( key > input->heap[node*2].key){//left자식하고 비교 후 
+				input->heap[node].key=input->heap[node*2].key;
+				input->heap[node*2].key=key; //left node key값 수정 
+				if ( input->heap[node].key > input->heap[node*2+1].key){  //오른쪽노드체크 
+					int temp=input->heap[node*2+1].key;
+					input->heap[node*2+1].key=input->heap[node].key;
+					input->heap[node].key=temp;
+				}
+			}
+			else{  //오른쪽자식하고만비교 
+				if ( input->heap[node].key > input->heap[node*2+1].key){  //오른쪽노드체크 
+					int temp=input->heap[node*2+1].key;
+					input->heap[node*2+1].key=input->heap[node].key;
+					input->heap[node].key=temp;
+				}
+			}
+			node=node*2; //node수정 
+		}
+	}
+	for(int j=1;j<=size;j++){
+		printf("%d ",input->heap[j].key);
+	}
+	printf("\n");
+}
+
+int main(){
+	int in[10]={1,4,2,7,5,3,3,7,8,9}; //1~10   index+1=노드의 index(1~10)값
+	HeapType* input=(HeapType*)malloc(sizeof(HeapType));
+	input->heap_size=size;
+	input->heap=(element*)malloc(sizeof(element)*(input->heap_size+1)); //메모리 할당 
+	
+	printf("Input:\n");
+	for (int i=0;i<input->heap_size;i++){
+		input->heap[i+1].key=in[i]; 
+		printf("%d ",input->heap[i+1].key);   //확인용 
+		//heap[i+1]의 구조 요소인 key는 .으로 사용!! 포인터의 ->아니고 
+	}
+	printf("\nOutPut:\n");
+	Decrease_key_min_heap(input,4,3);   //4번째 노드의key값 3으로 바꾸기 
+	Increase_key_min_heap(input,3,10);  //3번째 노드의 key값 10으로 바꾸기 
+}
