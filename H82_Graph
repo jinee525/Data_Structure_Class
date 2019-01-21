@@ -1,0 +1,173 @@
+//작은 edge값을 따라 vertex 잇기. 노드사이의 distance 출력하기
+
+#include <stdlib.h>
+#include <stdio.h>
+#define TRUE 1
+#define FALSE 0
+#define MAX_VERTICES 8
+#define INF 1000L
+
+int weight[MAX_VERTICES][MAX_VERTICES] =
+{ { 0,3,INF,INF,INF,INF,INF,14 },
+{ 3,0,8,INF,INF,INF,INF,10 },
+{ INF,8,0,15,2,INF,INF,INF },
+{ INF,INF,15,0,INF,INF,INF,INF },
+{ INF,INF,2,INF,0,9,4,5 },
+{ INF,INF,INF,INF,9,0,INF,INF },
+{ INF,INF,INF,INF,4,INF,0,6 },
+{ 14,10,INF,INF,5,INF,6,0 } };
+
+typedef struct Node {
+	int v; //v0~v7
+	int dist;	// v's edge distance
+	int parent; //parent node 
+} Node;
+
+typedef struct HeapType {
+	Node** node;  //1~8 (min_heap)
+	int heap_size = MAX_VERTICES;  // 8
+} HeapType;
+
+
+
+void build_min_heap(HeapType *h, int size)
+{
+	int temp;
+	int small;
+	int m;
+	//printf("s %d", size);
+	for (int i = (size) / 2; i <= 1; i--) {   //밑에서 위로 올라가야함!! 4~!
+		temp = i;
+		while (true) { //오른쪽 자식과 왼쪽 자식의 distance의 크기를 비교하여작은 값의 index(1~8)를 samll에 저장 
+			if (temp * 2 + 1 <= size && temp * 2 <= size) {  //size안에 있는 범위인가.. 
+				//printf("#1");
+				if (h->node[temp * 2 + 1]->dist > h->node[temp * 2]->dist) { //left node 가 작음 
+					small = temp * 2;
+				}
+				if (h->node[temp * 2 + 1]->dist <  h->node[temp * 2]->dist) {  //right node가 작음 
+					small = temp * 2 + 1;
+				}//작은 값을 현재 노드의 weight값과 비교하여 현재노드값이 크면 자리교환 
+				if (h->node[temp]->dist > h->node[small]->dist) {
+					m = h->node[small]->dist;
+					h->node[small]->dist = h->node[temp]->dist;
+					h->node[temp]->dist = m;
+					temp = small;
+					continue;
+				}
+				if (h->node[temp]->dist < h->node[small]->dist) {
+					break;
+				}
+			} //leafnode인경우 break 
+			if (temp * 2 + 1 > size && temp * 2 > size) {
+				//printf("#2");
+				break;
+			}//왼쪽 자식만 있는경우 , 노드의index으로 판단한다!! 
+			if (temp * 2 + 1 > size && temp * 2 <= size) {
+				//printf("#3");
+				if (h->node[temp]->dist > h->node[temp * 2]->dist) {
+					m = h->node[temp * 2]->dist;
+					h->node[temp * 2]->dist = h->node[temp]->dist;
+					h->node[temp]->dist = m;
+					temp = temp * 2;
+					continue;
+				}
+				if (h->node[temp]->dist < h->node[temp * 2]->dist)
+					break;
+			}
+		}
+	}
+}
+
+Node* delete_min_heap(HeapType *h) { //이걸 v번호만 빼는 거 말고 노드 통째로 빼는걸로
+	int parent, child;
+	Node* temp,*item;
+	item = h->node[1]; //루트노드를 통째로 
+	temp = h->node[(h->heap_size)--];  //마지막노드 
+	parent = 1; child = 2;
+	while (child <= h->heap_size) {
+		if ((child < h->heap_size) && (h->node[child]->dist) > h->node[child + 1]->dist)
+			child++;
+		if (temp->dist <= h->node[child]->dist)
+			break;
+		h->node[parent] = h->node[child];
+		parent = child;
+		child *= 2;
+	}
+	h->node[parent] = temp;
+	return item; //뺴낸 v번호 리턴 
+}
+
+void Decrease_key_min_heap(HeapType* input, int node, int key) {
+	//node는 노드의 index+1, 1~size //key는 그안의 숫자 
+	if (key >= input->node[node]->dist)
+		printf("new key is not smaller than current key\n");
+	// 첫노드전까지 key값 비교해가며 minheap 만족하도록 하기 
+	else {
+		Node* temp = input->node[node]; //해당 값 복사해놓기
+		temp->dist = key;
+			while ((node != 1) && (key < input->node[node / 2]->dist)) { //자식보다 작을 때 까지 반복 
+			input->node[node]= input->node[node / 2]; //부모노드의key값을 자신으로가져오기 
+			input->node[node / 2]=temp;//부모노드의key값을 decrease한 key값으로 변경 
+			node = node / 2; //node값 수정 
+		}
+	}
+}
+
+void print_prim(Node** data){
+	for (int i = 1; i < 8; i++) {
+	printf("Vertex %d -> %d \t edge: %d \n", data[i]->parent, data[i]->v, data[i]->dist);
+	}
+}
+
+// n: the number of vertices on the graph 
+void prim(int s, int n) {
+	int selected[MAX_VERTICES]; //선택한 노드 기록하기 
+	Node** data = (Node**)malloc(sizeof(Node*)*MAX_VERTICES); //노드 생성 
+	HeapType* heap = (HeapType*)malloc(sizeof(HeapType));
+	heap->node = (Node**)malloc(sizeof(Node*)*(MAX_VERTICES + 1));
+	heap->heap_size = MAX_VERTICES;   //heap setting
+	
+	int i, u, v;
+	Node* u_temp,*v_temp;
+	
+	for (u = 0; u<n; u++) {  //v0~v7 setting
+		Node* newnode = (Node*)malloc(sizeof(Node));  //create new node
+		newnode->dist = INF;  //set node's distance infinite 
+		newnode->v = u; //set vertice 0~7
+		newnode->parent = NULL; //parent node
+		//build_heap(heap, newnode); //build heap
+		data[u] = newnode; //node에 넣기 
+		heap->node[u+1] = newnode; //heap->node에 넣기 
+		//두 포인터가 하나의 Node를 가리키고 있는 것
+		//heap은 0번 비우고 1번부터 시작.(min heap 연산 때문에) 
+		selected[u] = FALSE;//선택 안되었다고 세팅하기 
+	}
+	heap->node[1]->dist = 0; //set start v's distance to 0
+	build_min_heap(heap, MAX_VERTICES); //build min heap
+
+	for (i = 0; i<n; i++) {
+		int c;  //heap의 node num 
+		u_temp = delete_min_heap(heap); //root node 빼기 vec0~7
+		//printf("delete heap %d\n",u_temp->v);  //확인용 
+		selected[u_temp->v] = TRUE;
+		for (v = 1; v<=heap->heap_size; v++) { //인접노드 heap에 넣기 
+			
+			v_temp = heap->node[v]; //힙에 있는 노드 순서대로 비교
+			if (weight[u_temp->v][v_temp->v] != INF) { //값이 있는 노드들을 대상으로 
+				if (!selected[v_temp->v] && weight[u_temp->v][v_temp->v]< v_temp->dist) {
+					v_temp->parent = u_temp->v; //parent 저장해주기
+					//printf("Decrease %d to %d\n", v_temp->v, weight[u_temp->v][v_temp->v]);//확인용 
+					Decrease_key_min_heap(heap, v, weight[u_temp->v][v_temp->v]); 
+					// 짧은 거리로 바꾸기! 
+				}
+			}
+		}
+	}
+	print_prim(data);
+}
+
+int main()
+
+{
+	prim(0, MAX_VERTICES);
+}
