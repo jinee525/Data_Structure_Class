@@ -1,0 +1,89 @@
+//Binary search tree를 inorder traversal 이용하여 출력
+
+#include "stack"
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+#include "time.h"
+int input_size = 1000;
+int data_maxval = 10000;
+
+typedef struct Node{
+	int value;
+	Node *left;
+	Node *right;
+}Node;
+
+
+
+Node* insert(Node *root, int v) {
+	Node* nn= (Node*)malloc(sizeof(Node));
+	nn->value=v;
+	nn->left=NULL;
+	nn->right=NULL;
+	Node* temp=root;  //비교하려고 temp에 트리가져옴 
+	 
+	if (temp==NULL) { //빈 트리였을 때 
+    	temp=nn;  //첫 노드 생성!    //new 새이름으로 못씀...? 
+    	return(temp);
+    }
+    else{   //트리 있는 상태에서 추가하기 
+   		while(1){
+   			//넣으려는 값이 작은경우 && 왼쪽이 비어있을때 
+            if (temp->value >= nn->value && temp->left==NULL){
+                temp->left=nn; //insert at left
+    	        break; //끝! 
+            }
+            else if (temp->value >= nn->value && temp->left!=NULL){
+				temp=temp->left;  //왼쪽으로 이동! 다시while문돌기! 
+            }//넣으려는 값이 큰경우 && 오른쪽이 빈경우 
+            else if (temp->value < nn->value && temp->right==NULL){
+                temp->right=nn;
+                break; //끝! 
+            }
+            else{
+            	temp=temp->right;//오른쪽으로 이동! 다시while문돌기! 
+            }
+        }   
+        return(temp);
+    }            
+}
+
+//inorder traversal
+void traversal(Node *root) {
+    if (root == NULL) {  //끝! 
+        return;
+    }
+    traversal(root->left);
+    printf("->%d",root->value);
+    traversal(root->right);
+}
+
+int random(int range){
+	int random = rand()%range+1; //0~10000 범위의 난수 생성 
+	return random;
+}
+
+int main(){
+	Node* node=(Node*)malloc(sizeof(Node)); //tree 생성 
+	node->value=NULL;
+	node->left=NULL;
+	node->right=NULL; //초기화 	
+	
+	srand(time(NULL)); //중복 난수 제거  
+	//output int array 
+	int *input = (int *)malloc(sizeof(int)*input_size);
+	Node *root=NULL;
+	
+	//create random num 1~10000 -> array(size 1000)
+	for (int i = 0; i < input_size; i++){
+		input[i] = random(data_maxval);
+	}
+	printf("input ok\n");
+	
+	for (int i=0 ; i < input_size; i++){
+		insert(node,input[i]);
+	}
+	printf("insert ok\n");
+		traversal(node);//결과 출력! inorder traversal 이용!  
+}
